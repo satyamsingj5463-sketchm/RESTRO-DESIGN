@@ -1,0 +1,8 @@
+{
+  "name": "Coder Cafe - Food Delivery App",
+  "description": "Official Coder Cafe food delivery app with live GPS tracking, real-time Firebase sync, multi-gateway payments, staff kitchen display, and admin portal.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
