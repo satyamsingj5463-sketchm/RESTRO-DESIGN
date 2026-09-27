@@ -309,35 +309,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
   }
 ];
 
-export const INITIAL_REVIEWS: ReviewItem[] = [
-  {
-    id: 'rev-1',
-    customerName: 'Aarav Mehta',
-    rating: 5,
-    comment: 'The Paneer Tikka burger and Async Cold brew got our dev team through the entire product launch! Super crisp packaging and delivered in 22 mins flat.',
-    date: 'Yesterday',
-    dishesOrdered: ['Crispy Paneer Tikka Burger', 'Async Cold Brew with Oat Foam'],
-    status: 'published'
-  },
-  {
-    id: 'rev-2',
-    customerName: 'Pooja Sharma',
-    rating: 5,
-    comment: 'Best wood-fired pizza and peri-peri fries in town. The live GPS delivery tracker was pinpoint accurate, saw the rider reach our society gate in real-time!',
-    date: '2 days ago',
-    dishesOrdered: ['Peri-Peri Crinkle Fries with Truffle Dip', 'Artisan Wood-Fired Margherita Pizza'],
-    status: 'published'
-  },
-  {
-    id: 'rev-3',
-    customerName: 'Rohan Verma',
-    rating: 5,
-    comment: 'Coder Cafe is our default lunch spot in Cyber City. The double espresso is intensely rich and the packaging keeps everything steaming hot.',
-    date: '3 days ago',
-    dishesOrdered: ['Artisan Double Espresso', 'Royal Chicken Smashed Burger'],
-    status: 'published'
-  }
-];
+// Real Customer Reviews (Loaded strictly from Firestore reviews collection)
+export const INITIAL_REVIEWS: ReviewItem[] = [];
 
 export const DEFAULT_ADDRESSES: DeliveryAddress[] = [
   {

@@ -17,6 +17,7 @@ interface RestaurantHeroProps {
 
 export const RestaurantHero: React.FC<RestaurantHeroProps> = ({ onOpenReviews }) => {
   const {
+    reviews,
     selectedCategory,
     setSelectedCategory,
     filterVegOnly,
@@ -25,6 +26,12 @@ export const RestaurantHero: React.FC<RestaurantHeroProps> = ({ onOpenReviews })
     appliedPromo,
     addToast
   } = useApp();
+
+  const publishedReviews = reviews.filter((r) => r.status === 'published');
+  const reviewCount = publishedReviews.length;
+  const avgRating = reviewCount > 0
+    ? (publishedReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1)
+    : null;
 
   const categories = [
     { id: 'all', label: 'All Items', icon: '✨' },
@@ -46,138 +53,124 @@ export const RestaurantHero: React.FC<RestaurantHeroProps> = ({ onOpenReviews })
   };
 
   return (
-    <section className="relative overflow-hidden mb-6">
-      {/* Background Banner with premium gradient overlay */}
-      <div className="relative h-48 sm:h-60 md:h-64 rounded-3xl overflow-hidden shadow-2xl border border-white/[0.08]">
+    <section className="relative overflow-hidden mb-5">
+      {/* Background Banner with luxury gradient overlay */}
+      <div className="relative h-44 sm:h-56 rounded-3xl overflow-hidden shadow-lg border border-slate-200/80">
         <img
           src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1600&q=80"
           alt="Coder Cafe Kitchen"
-          className="w-full h-full object-cover object-center filter brightness-[0.45] scale-105 transition-transform duration-700 hover:scale-100"
+          className="w-full h-full object-cover object-center filter brightness-[0.70] scale-105 transition-transform duration-700 hover:scale-100"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080C14] via-[#080C14]/75 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B4B]/95 via-[#1E1B4B]/40 to-transparent" />
 
         {/* Cafe Information overlay */}
-        <div className="absolute bottom-0 inset-x-0 p-4 sm:p-6 flex flex-col justify-end">
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-[11px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md shadow-amber-500/20">
+        <div className="absolute bottom-0 inset-x-0 p-3.5 sm:p-5 flex flex-col justify-end">
+          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+            <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-sm">
               <Sparkles className="w-3 h-3" /> Gourmet Kitchen Hub
             </span>
-            <span className="px-2.5 py-0.5 rounded-full bg-white/[0.06] backdrop-blur-md border border-white/[0.1] text-slate-200 text-[11px] font-medium flex items-center gap-1">
-              <Flame className="w-3 h-3 text-orange-400" /> Artisan Roasts & Smashed Burgers
+            <span className="px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-white text-[10px] font-medium flex items-center gap-1">
+              <Flame className="w-3 h-3 text-amber-300" /> Artisan Roasts & Smashed Burgers
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight font-sans">
-            CODER CAFE <span className="text-amber-400 font-light text-base sm:text-2xl">| Premium Tech Kitchen</span>
+          <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight font-sans drop-shadow-sm">
+            CODER CAFE <span className="text-amber-300 font-light text-xs sm:text-lg">| Premium Tech Kitchen</span>
           </h1>
 
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-300 mt-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-white/90 mt-2">
+            {/* Real Rating Button - Dynamically computed from Firestore */}
             <button
               onClick={onOpenReviews}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold hover:bg-emerald-500/25 transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/25 border border-emerald-400/40 text-emerald-200 font-bold hover:bg-emerald-500/35 transition-colors cursor-pointer"
             >
-              <Star className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
-              <span>4.9</span>
-              <span className="text-slate-400 font-normal underline">(1,240+ reviews)</span>
+              <Star className="w-3.5 h-3.5 fill-emerald-300 text-emerald-300" />
+              <span>{avgRating ? avgRating : 'New'}</span>
+              <span className="text-white/80 font-normal underline ml-0.5">
+                {reviewCount > 0 ? `(${reviewCount} review${reviewCount > 1 ? 's' : ''})` : '(Be first to review)'}
+              </span>
             </button>
 
-            <div className="flex items-center gap-1.5 text-slate-300 font-medium">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <div className="flex items-center gap-1 text-white font-medium">
+              <Clock className="w-3.5 h-3.5 text-amber-300" />
               <span>20-30 mins</span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-slate-300 font-medium">
-              <MapPin className="w-3.5 h-3.5 text-amber-400" />
-              <span>1.2 km • Express Corridor</span>
-            </div>
-
-            <div className="hidden sm:flex items-center gap-1.5 text-emerald-400 font-semibold">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Free delivery on orders ₹399+</span>
+            <div className="flex items-center gap-1 text-white font-medium">
+              <MapPin className="w-3.5 h-3.5 text-amber-300" />
+              <span>1.2 km • Express</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Promos Strip */}
-      <div className="mt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-transparent border border-amber-500/30 text-amber-200 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-500/20 text-amber-400 rounded-xl">
+      {/* Promos Strip - Clean, separated modern mobile cards */}
+      <div className="mt-3 grid grid-cols-1 gap-2.5">
+        <div className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50/60 border border-amber-200/90 text-amber-950 text-xs shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-amber-400 text-slate-950 font-black rounded-xl shadow-sm">
               <Tag className="w-4 h-4" />
             </div>
             <div>
-              <p className="font-bold text-white flex items-center gap-1.5">
-                Use code <span className="font-mono text-amber-300 font-black tracking-wider">TASTY50</span>
+              <p className="font-extrabold text-slate-900 flex items-center gap-1.5">
+                Use coupon code <span className="font-mono text-amber-700 font-black tracking-wider">TASTY50</span>
               </p>
-              <p className="text-slate-400 text-[11px]">Flat 50% discount up to ₹100 on orders ₹199+</p>
+              <p className="text-slate-600 text-[11px]">Flat 50% discount up to ₹100 on orders ₹199+</p>
             </div>
           </div>
           <button
             onClick={handleApplyBannerPromo}
             className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
               appliedPromo === 'TASTY50'
-                ? 'bg-emerald-500 text-slate-950 font-black'
-                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                ? 'bg-emerald-600 text-white font-black'
+                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black shadow-sm'
             }`}
           >
-            {appliedPromo === 'TASTY50' ? 'Applied ✓' : 'Apply 50%'}
+            {appliedPromo === 'TASTY50' ? 'Applied ✓' : 'Apply'}
           </button>
-        </div>
-
-        <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#0D131F] border border-white/[0.08] text-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-sky-500/15 text-sky-400 rounded-xl">
-              <Zap className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="font-bold text-white">Live GPS Delivery Tracking</p>
-              <p className="text-slate-400 text-[11px]">Real-time rider telemetry, direct in-app chat & UPI payments</p>
-            </div>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-            Active Hub
-          </span>
         </div>
       </div>
 
       {/* Filter Row: Category pills & Veg Only Toggle */}
-      <div className="mt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="mt-3.5 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+            Explore Categories
+          </h3>
+          {/* Veg Only Switch */}
+          <button
+            type="button"
+            onClick={() => setFilterVegOnly(!filterVegOnly)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition-all cursor-pointer text-xs ${
+              filterVegOnly
+                ? 'bg-emerald-50 border-emerald-400 text-emerald-800 font-bold'
+                : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            {/* Standard Indian Veg Dot */}
+            <span className="w-3.5 h-3.5 rounded border border-emerald-600 flex items-center justify-center p-0.5 bg-white">
+              <span className={`w-1.5 h-1.5 rounded-full ${filterVegOnly ? 'bg-emerald-600' : 'bg-transparent'}`} />
+            </span>
+            <span className="font-semibold text-[11px]">Pure Veg Only</span>
+          </button>
+        </div>
+
         {/* Category Horizontal Scroll Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 w-full sm:w-auto scrollbar-none">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 w-full no-scrollbar">
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
                 selectedCategory === cat.id
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-lg shadow-amber-500/20 scale-[1.02]'
-                  : 'bg-[#0E1422] hover:bg-[#141C2E] text-slate-300 border border-white/[0.06]'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-md shadow-amber-500/20 scale-[1.02]'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200'
               }`}
             >
               <span>{cat.icon}</span>
               <span>{cat.label}</span>
             </button>
           ))}
-        </div>
-
-        {/* Veg Only Switch */}
-        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-          <button
-            type="button"
-            onClick={() => setFilterVegOnly(!filterVegOnly)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all cursor-pointer text-xs ${
-              filterVegOnly
-                ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-300'
-                : 'bg-[#0E1422] border-white/[0.08] text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            {/* Standard Indian Veg Dot */}
-            <span className="w-3.5 h-3.5 rounded border border-emerald-500 flex items-center justify-center p-0.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${filterVegOnly ? 'bg-emerald-400' : 'bg-transparent'}`} />
-            </span>
-            <span className="font-bold">Pure Veg Only</span>
-          </button>
         </div>
       </div>
     </section>

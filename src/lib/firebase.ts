@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -16,4 +16,20 @@ export const db = getFirestore(
 
 // Initialize Firebase Auth
 export const auth = getAuth(app);
+
+// Test connection on boot as mandated by Firebase Skill
+export async function testFirestoreConnection(): Promise<boolean> {
+  try {
+    await getDocFromServer(doc(db, 'test', 'connection'));
+    return true;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.warn('Firestore offline or network constrained:', error.message);
+    }
+    return false;
+  }
+}
+testFirestoreConnection().catch(() => {});
+
 export default app;
+

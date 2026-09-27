@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "MenuItem": {
+      "title": "MenuItem",
+      "description": "A food or beverage item in Coder Cafe menu catalog",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique dish identifier" },
+        "name": { "type": "string", "description": "Dish title", "maxLength": 100 },
+        "codeName": { "type": "string", "description": "Short code name", "maxLength": 50 },
+        "description": { "type": "string", "description": "Dish description", "maxLength": 500 },
+        "price": { "type": "number", "description": "Price in INR" },
+        "originalPrice": { "type": "number", "description": "Original price before discount" },
+        "category": { "type": "string", "description": "Category slug", "enum": ["coffee", "burgers", "pizza", "sides", "desserts", "combos"] },
+        "image": { "type": "string", "description": "Image URL" },
+        "rating": { "type": "number", "description": "Calculated rating" },
+        "reviewsCount": { "type": "number", "description": "Review count" },
+        "isVeg": { "type": "boolean", "description": "Vegetarian flag" },
+        "isBestseller": { "type": "boolean", "description": "Bestseller badge" },
+        "isAvailable": { "type": "boolean", "description": "In-stock status" },
+        "prepTimeMinutes": { "type": "number", "description": "Kitchen prep time" }
+      },
+      "required": ["id", "name", "price", "category", "isVeg", "isAvailable"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer food delivery order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique order ID" },
+        "orderNumber": { "type": "string", "description": "Friendly order code (e.g. CC-4180)" },
+        "createdAt": { "type": "number", "description": "Timestamp in milliseconds" },
+        "scheduledFor": { "type": "string", "description": "Delivery schedule" },
+        "status": {
+          "type": "string",
+          "enum": ["placed", "preparing", "ready_for_pickup", "out_for_delivery", "delivered", "cancelled"],
+          "description": "Current order lifecycle status"
+        }
+      },
+      "required": ["id", "orderNumber", "status", "createdAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Verified diner rating and feedback",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Review identifier" },
+        "orderId": { "type": "string", "description": "Associated order ID" },
+        "customerName": { "type": "string", "description": "Reviewer name", "maxLength": 100 },
+        "rating": { "type": "number", "description": "Rating out of 5" },
+        "comment": { "type": "string", "description": "Customer feedback", "maxLength": 1000 },
+        "date": { "type": "string", "description": "Date or relative time string" },
+        "status": { "type": "string", "enum": ["published", "flagged", "hidden"] }
+      },
+      "required": ["id", "customerName", "rating", "comment", "status"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Registered customer profile with login timestamp, address and phone",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Customer identifier" },
+        "name": { "type": "string", "description": "Customer full name", "maxLength": 100 },
+        "phone": { "type": "string", "description": "Customer mobile phone number", "maxLength": 20 },
+        "email": { "type": "string", "description": "Customer email", "maxLength": 100 },
+        "loginTimestamp": { "type": "number", "description": "Last login timestamp in ms" },
+        "createdAt": { "type": "number", "description": "Registration timestamp in ms" }
+      },
+      "required": ["id", "name", "phone"]
+    }
+  },
+  "firestore": {
+    "/menu_items/{itemId}": {
+      "schema": "MenuItem",
+      "description": "Collection of dishes and drinks available in Coder Cafe"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Collection of all live and past customer orders"
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Collection of customer reviews and ratings"
+    },
+    "/customers/{customerId}": {
+      "schema": "Customer",
+      "description": "Collection of customer login profiles and delivery addresses"
+    }
+  }
+}

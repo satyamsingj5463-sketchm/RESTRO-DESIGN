@@ -4,35 +4,28 @@ import {
   ShoppingBag,
   MapPin,
   Search,
-  SlidersHorizontal,
   ChevronDown,
   User,
-  Shield,
-  ChefHat,
-  Bike,
-  Smartphone,
-  Monitor,
-  Wifi,
-  BatteryCharging,
-  Signal,
-  BookOpen,
+  Settings,
   X,
-  Compass
+  Compass,
+  Sparkles
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { PinLoginModal } from './PinLoginModal';
 
 interface HeaderProps {
   onOpenProfile: () => void;
   onOpenRoadmap: () => void;
+  onOpenSettingsHub: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenRoadmap }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onOpenProfile,
+  onOpenRoadmap,
+  onOpenSettingsHub
+}) => {
   const {
     role,
-    setRole,
-    staffAuthenticated,
-    adminAuthenticated,
     cartTotalCount,
     cartSubtotal,
     setIsCartOpen,
@@ -41,34 +34,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenRoadmap }) 
     addresses,
     searchQuery,
     setSearchQuery,
-    isMobileFrame,
-    setIsMobileFrame,
     addToast
   } = useApp();
 
   const [isAddressMenuOpen, setIsAddressMenuOpen] = useState(false);
-  const [pinModalRole, setPinModalRole] = useState<'staff' | 'admin' | null>(null);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
-
-  const handleRoleSelect = (targetRole: 'customer' | 'staff' | 'admin' | 'rider') => {
-    if (targetRole === 'customer') {
-      setRole('customer');
-    } else if (targetRole === 'rider') {
-      setRole('rider');
-    } else if (targetRole === 'staff') {
-      if (staffAuthenticated) {
-        setRole('staff');
-      } else {
-        setPinModalRole('staff');
-      }
-    } else if (targetRole === 'admin') {
-      if (adminAuthenticated) {
-        setRole('admin');
-      } else {
-        setPinModalRole('admin');
-      }
-    }
-  };
 
   const handleGpsDetect = () => {
     setIsDetectingLocation(true);
@@ -78,14 +49,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenRoadmap }) 
           setIsDetectingLocation(false);
           setIsAddressMenuOpen(false);
           addToast(
-            'GPS Location Locked',
-            `Lat: ${pos.coords.latitude.toFixed(4)}, Lng: ${pos.coords.longitude.toFixed(4)} • Coder Cafe delivery available in your zone.`,
+            'GPS Coordinates Locked',
+            `Lat: ${pos.coords.latitude.toFixed(4)}, Lng: ${pos.coords.longitude.toFixed(4)} • Coder Cafe delivery zone active.`,
             'success'
           );
         },
         () => {
           setIsDetectingLocation(false);
-          addToast('Location Fallback', 'Using Silicon Valley Tech Hub as your delivery zone.', 'info');
+          addToast('Location Fallback', 'Using Silicon Valley Tech Hub default zone.', 'info');
         },
         { timeout: 5000 }
       );
@@ -95,281 +66,163 @@ export const Header: React.FC<HeaderProps> = ({ onOpenProfile, onOpenRoadmap }) 
     }
   };
 
-  // Current time for Android status bar
-  const currentTimeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
   return (
-    <>
-      <header className="sticky top-0 z-40 bg-[#080C14]/95 backdrop-blur-md border-b border-white/[0.08] transition-all">
-        {/* Android Simulated Status Bar */}
-        <div className="bg-[#05080E] px-4 py-1 text-[11px] font-mono text-slate-400 flex items-center justify-between border-b border-white/[0.04]">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-300">{currentTimeStr}</span>
-            <span className="text-[10px] px-2 py-0.2 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30">
-              Android 14 Native (API 34)
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] text-emerald-400 font-bold">5G Jio/Airtel</span>
-            <Signal className="w-3 h-3 text-slate-400" />
-            <Wifi className="w-3 h-3 text-slate-400" />
-            <div className="flex items-center gap-1">
-              <span className="text-[10px]">98%</span>
-              <BatteryCharging className="w-3.5 h-3.5 text-emerald-400" />
+    <header className="sticky top-0 z-40 bg-gradient-to-r from-[#1E1B4B] via-[#2A2368] to-[#1E1B4B] text-white border-b border-amber-400/25 shadow-md shadow-indigo-950/20 transition-all">
+      <div className="max-w-md mx-auto px-3.5 py-2.5">
+        <div className="flex items-center justify-between gap-2">
+          {/* Brand Logo & Name */}
+          <div className="flex items-center gap-2.5">
+            <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 text-slate-950 font-black shadow-md shadow-amber-400/30 ring-2 ring-amber-300/50 shrink-0">
+              <Coffee className="w-5 h-5 text-slate-900" />
             </div>
+            <div>
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="font-black text-sm tracking-tight text-white font-mono">
+                  CODER<span className="text-amber-400">CAFE</span>
+                </span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 font-bold uppercase tracking-wider">
+                  Open
+                </span>
+              </div>
+
+              {/* Delivery Location Selector */}
+              <div className="relative mt-0.5">
+                <button
+                  onClick={() => setIsAddressMenuOpen(!isAddressMenuOpen)}
+                  className="flex items-center gap-1 text-[11px] text-indigo-100 hover:text-amber-300 transition-colors cursor-pointer text-left"
+                >
+                  <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
+                  <span className="font-medium truncate max-w-[130px] text-indigo-100">
+                    {currentAddress.label}: {currentAddress.addressLine1}
+                  </span>
+                  <ChevronDown className="w-2.5 h-2.5 text-indigo-300" />
+                </button>
+
+                {/* Address dropdown */}
+                {isAddressMenuOpen && (
+                  <div className="fixed inset-x-3 top-16 sm:absolute sm:left-0 sm:top-full sm:inset-x-auto sm:mt-2 w-auto sm:w-72 bg-white border border-slate-200 rounded-2xl shadow-2xl p-3 z-50 text-slate-800 animate-slide-up">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                      <span className="text-xs font-bold uppercase tracking-wider text-indigo-950">
+                        Select Delivery Zone
+                      </span>
+                      <button
+                        onClick={() => setIsAddressMenuOpen(false)}
+                        className="p-1 hover:bg-slate-100 rounded-lg text-slate-400"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={handleGpsDetect}
+                      disabled={isDetectingLocation}
+                      className="w-full mb-2 p-2 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200 rounded-xl text-xs text-indigo-800 font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    >
+                      <Compass className={`w-3.5 h-3.5 text-indigo-600 ${isDetectingLocation ? 'animate-spin' : ''}`} />
+                      {isDetectingLocation ? 'Detecting GPS...' : 'Auto-Detect Current GPS'}
+                    </button>
+
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                      {addresses.map((addr, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            setCurrentAddress(addr);
+                            setIsAddressMenuOpen(false);
+                            addToast('Address Selected', `Delivering to ${addr.label}`, 'info');
+                          }}
+                          className={`p-2 rounded-xl text-xs cursor-pointer transition-colors flex items-start gap-2 ${
+                            currentAddress.label === addr.label
+                              ? 'bg-amber-50 border border-amber-300 text-amber-950 font-bold'
+                              : 'hover:bg-slate-50 text-slate-700'
+                          }`}
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                          <div>
+                            <div className="font-bold flex items-center gap-1.5">
+                              <span>{addr.label}</span>
+                              {currentAddress.label === addr.label && (
+                                <span className="text-[8px] bg-amber-500 text-slate-950 px-1 rounded font-black">
+                                  ACTIVE
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-slate-500 text-[10px] truncate">{addr.addressLine1}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Action Icons: Search toggle, Settings/Portals Hub button, Cart pill */}
+          <div className="flex items-center gap-1.5">
+            {/* Search Toggle Button */}
+            <button
+              onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+              className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                isSearchExpanded || searchQuery
+                  ? 'bg-amber-400/25 border-amber-300 text-amber-300'
+                  : 'bg-white/10 border-white/15 text-indigo-100 hover:bg-white/20'
+              }`}
+              title="Search Menu"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+
+            {/* Settings & Portals Hub Button */}
+            <button
+              onClick={onOpenSettingsHub}
+              className="relative p-2 rounded-xl bg-white/10 border border-amber-400/30 hover:bg-white/20 text-amber-300 transition-all cursor-pointer shadow-sm"
+              title="Settings & Operational Hub (Staff, Rider, Admin, PINs)"
+            >
+              <Settings className="w-4 h-4" />
+              {role !== 'customer' && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-indigo-900" />
+              )}
+            </button>
+
+            {/* Quick Cart Pill */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gradient-to-r from-amber-400 via-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black rounded-xl text-xs shadow-md shadow-amber-500/30 transition-all cursor-pointer"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span className="font-mono text-xs">
+                {cartTotalCount > 0 ? `₹${cartSubtotal.toFixed(0)}` : '0'}
+              </span>
+            </button>
           </div>
         </div>
 
-        {/* Main Navigation Bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5">
-          <div className="flex items-center justify-between gap-3">
-            {/* Logo & Brand */}
-            <div className="flex items-center gap-3">
-              <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-400 text-slate-950 font-black shadow-lg shadow-amber-500/20 ring-2 ring-amber-400/30">
-                <Coffee className="w-5 h-5" />
-                <span className="absolute -bottom-1 -right-1 text-[9px] bg-slate-950 text-amber-400 font-mono px-1 rounded border border-amber-500/40">
-                  {'>_'}
-                </span>
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-base sm:text-lg tracking-tight text-white font-mono">
-                    CODER<span className="text-amber-400">CAFE</span>
-                  </span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold uppercase tracking-wider">
-                    Open
-                  </span>
-                </div>
-                {/* Delivery location selector */}
-                <div className="relative">
-                  <button
-                    onClick={() => setIsAddressMenuOpen(!isAddressMenuOpen)}
-                    className="flex items-center gap-1 text-xs text-slate-400 hover:text-amber-300 transition-colors cursor-pointer text-left"
-                  >
-                    <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
-                    <span className="font-medium text-slate-200 truncate max-w-[140px] sm:max-w-[200px]">
-                      {currentAddress.label}: {currentAddress.addressLine1}
-                    </span>
-                    <ChevronDown className="w-3 h-3 text-slate-400" />
-                  </button>
-
-                  {/* Address dropdown */}
-                  {isAddressMenuOpen && (
-                    <div className="absolute left-0 top-full mt-2 w-72 sm:w-80 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-3 z-50 text-slate-200 animate-fade-in">
-                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                          Select Delivery Zone
-                        </span>
-                        <button
-                          onClick={() => setIsAddressMenuOpen(false)}
-                          className="p-1 hover:bg-slate-800 rounded-md text-slate-400"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={handleGpsDetect}
-                        disabled={isDetectingLocation}
-                        className="w-full mb-2 p-2.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-xs text-amber-300 font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                      >
-                        <Compass className={`w-4 h-4 ${isDetectingLocation ? 'animate-spin' : ''}`} />
-                        {isDetectingLocation ? 'Detecting GPS Coordinates...' : 'Auto-Detect Current GPS Location'}
-                      </button>
-
-                      <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                        {addresses.map((addr, idx) => (
-                          <div
-                            key={idx}
-                            onClick={() => {
-                              setCurrentAddress(addr);
-                              setIsAddressMenuOpen(false);
-                              addToast('Address Selected', `Delivering to ${addr.label}`, 'info');
-                            }}
-                            className={`p-2.5 rounded-xl text-xs cursor-pointer transition-colors flex items-start gap-2.5 ${
-                              currentAddress.label === addr.label
-                                ? 'bg-amber-500/20 border border-amber-500/40 text-amber-200'
-                                : 'hover:bg-slate-800 text-slate-300'
-                            }`}
-                          >
-                            <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                            <div>
-                              <div className="font-bold flex items-center gap-2">
-                                <span>{addr.label}</span>
-                                {currentAddress.label === addr.label && (
-                                  <span className="text-[9px] bg-amber-500 text-slate-950 px-1 rounded font-black">
-                                    ACTIVE
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-slate-400 text-[11px] truncate">{addr.addressLine1}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Middle Search Bar (Desktop / Tablet) */}
-            <div className="hidden md:flex flex-1 max-w-md mx-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search Hotfix Espresso, Binary Burgers, Pizza..."
-                  className="w-full pl-9 pr-4 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-all font-sans"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Right Action Controls */}
-            <div className="flex items-center gap-2">
-              {/* Role Switcher Pills */}
-              <div className="flex items-center bg-[#090D15] p-1 rounded-2xl border border-white/[0.08]">
-                <button
-                  onClick={() => handleRoleSelect('customer')}
-                  title="Customer Food Ordering View"
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    role === 'customer'
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md font-bold'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <Coffee className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Menu</span>
-                </button>
-
-                <button
-                  onClick={() => handleRoleSelect('staff')}
-                  title="Kitchen Staff Portal"
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    role === 'staff'
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md font-bold'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <ChefHat className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Staff</span>
-                </button>
-
-                <button
-                  onClick={() => handleRoleSelect('admin')}
-                  title="Admin Management Portal"
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    role === 'admin'
-                      ? 'bg-purple-600 text-white shadow-md font-bold'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <Shield className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Admin</span>
-                </button>
-
-                <button
-                  onClick={() => handleRoleSelect('rider')}
-                  title="Live Rider Simulator"
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    role === 'rider'
-                      ? 'bg-sky-500 text-slate-950 shadow-md font-bold'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <Bike className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Rider</span>
-                </button>
-              </div>
-
-              {/* Technical Roadmap button */}
-              <button
-                onClick={onOpenRoadmap}
-                title="View Technical Roadmap & Architecture"
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-amber-300 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-                <span>Roadmap</span>
-              </button>
-
-              {/* Toggle Mobile Android Frame vs Full Web layout */}
-              <button
-                onClick={() => setIsMobileFrame(!isMobileFrame)}
-                title={isMobileFrame ? 'Switch to Full Browser View' : 'Switch to Android Phone Preview Frame'}
-                className="p-2 bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 rounded-xl border border-white/[0.08] transition-colors cursor-pointer hidden md:flex items-center justify-center"
-              >
-                {isMobileFrame ? <Monitor className="w-4 h-4" /> : <Smartphone className="w-4 h-4 text-amber-400" />}
-              </button>
-
-              {/* Cart Drawer Trigger with INR currency */}
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className="relative flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
-              >
-                <ShoppingBag className="w-4 h-4" />
-                <span className="hidden sm:inline">
-                  {cartTotalCount > 0 ? `₹${cartSubtotal.toFixed(0)}` : 'Cart'}
-                </span>
-                {cartTotalCount > 0 && (
-                  <span className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-950 text-amber-400 text-[10px] font-black">
-                    {cartTotalCount}
-                  </span>
-                )}
-              </button>
-
-              {/* Profile button */}
-              <button
-                onClick={onOpenProfile}
-                title="Customer Profile & Loyalty Club"
-                className="p-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer"
-              >
-                <User className="w-4 h-4 text-amber-400" />
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Search input */}
-          <div className="mt-2.5 md:hidden">
+        {/* Expandable Luxury Mobile Search Bar */}
+        {(isSearchExpanded || searchQuery) && (
+          <div className="mt-2.5 pt-2 border-t border-white/10 animate-slide-up">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-amber-300" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search coffee, burger, pizza, fries..."
-                className="w-full pl-9 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-sans"
+                placeholder="Search coffee, smash burger, pizza, fries..."
+                autoFocus
+                className="w-full pl-8 pr-8 py-2 bg-indigo-950/80 border border-indigo-400/40 rounded-xl text-xs text-white placeholder-indigo-200/60 focus:outline-none focus:border-amber-400 font-sans shadow-inner"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-indigo-300 hover:text-white"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
           </div>
-        </div>
-      </header>
-
-      {/* PIN Login Modal */}
-      {pinModalRole && (
-        <PinLoginModal
-          isOpen={true}
-          targetRole={pinModalRole}
-          onClose={() => setPinModalRole(null)}
-        />
-      )}
-    </>
+        )}
+      </div>
+    </header>
   );
 };

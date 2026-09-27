@@ -16,6 +16,7 @@ import {
   doc,
   setDoc,
   updateDoc,
+  deleteDoc,
   onSnapshot,
   query,
   orderBy,
@@ -37,7 +38,10 @@ interface AppContextType {
   setRole: (role: UserRole) => void;
   staffAuthenticated: boolean;
   adminAuthenticated: boolean;
-  verifyPin: (pin: string, targetRole: 'staff' | 'admin') => boolean;
+  riderAuthenticated: boolean;
+  securityPins: { admin: string; staff: string; rider: string };
+  updateSecurityPin: (role: 'staff' | 'admin' | 'rider', newPin: string) => boolean;
+  verifyPin: (pin: string, targetRole: 'staff' | 'admin' | 'rider') => boolean;
   logoutRole: () => void;
 
   // User Profile
@@ -127,6 +131,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [role, setRole] = useState<UserRole>('customer');
   const [staffAuthenticated, setStaffAuthenticated] = useState<boolean>(false);
   const [adminAuthenticated, setAdminAuthenticated] = useState<boolean>(false);
+  const [riderAuthenticated, setRiderAuthenticated] = useState<boolean>(false);
+
+  // Security Credentials (Default: 161616 across Admin, Staff, and Rider)
+  const [securityPins, setSecurityPins] = useState<{
+    admin: string;
+    staff: string;
+    rider: string;
+  }>({
+    admin: '161616',
+    staff: '161616',
+    rider: '161616'
+  });
+
+  const updateSecurityPin = (targetRole: 'staff' | 'admin' | 'rider', newPin: string): boolean => {
+    const clean = newPin.trim();
+    if (!clean || clean.length < 4) {
+      addToast('Invalid PIN', 'Security PIN must be at least 4 digits.', 'warning');
+      return false;
+    }
+    setSecurityPins((prev) => ({ ...prev, [targetRole]: clean }));
+    addToast('Security PIN Updated', `${targetRole.toUpperCase()} credentials successfully updated.`, 'success');
+    return true;
+  };
 
   // User details
   const [user, setUser] = useState({
@@ -154,73 +181,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [tipAmount, setTipAmount] = useState<number>(30);
   const [deliverySchedule, setDeliverySchedule] = useState<'immediate' | string>('immediate');
 
-  // Initial Demo Order for accurate initial state
-  const INITIAL_DEMO_ORDER: Order = {
-    id: 'ord-101',
-    orderNumber: 'CC-4180',
-    createdAt: Date.now() - 1000 * 60 * 14,
-    status: 'out_for_delivery',
-    customer: {
-      id: 'user-coder-1',
-      name: 'Satyam Singh',
-      phone: '+91 98765 43210',
-      email: 'satyam.singh@codercafe.dev',
-      address: DEFAULT_ADDRESSES[0]
-    },
-    items: [
-      {
-        cartItemId: 'm4-cheese',
-        menuItem: INITIAL_MENU_ITEMS[3] || INITIAL_MENU_ITEMS[0],
-        quantity: 1,
-        selectedOptions: [{ groupTitle: 'Cheese & Fillings', optionName: 'Melted Cheddar Slice', price: 35 }],
-        itemTotalPrice: 255
-      },
-      {
-        cartItemId: 'm2-standard',
-        menuItem: INITIAL_MENU_ITEMS[1] || INITIAL_MENU_ITEMS[0],
-        quantity: 1,
-        selectedOptions: [{ groupTitle: 'Milk Foam Choice', optionName: 'Oat Milk Velvety Foam', price: 0 }],
-        itemTotalPrice: 180
-      }
-    ],
-    pricing: {
-      subtotal: 435,
-      discount: 100,
-      promoCode: 'TASTY50',
-      deliveryFee: 0,
-      platformFee: 5.0,
-      gstTax: 16.75,
-      tip: 30,
-      total: 386.75
-    },
-    payment: {
-      method: 'upi',
-      status: 'paid',
-      transactionId: 'UPI-IND-894726190'
-    },
-    rider: {
-      id: 'rider-alex',
-      name: 'Alex "Torvalds" Chen',
-      phone: '+91 98112 23344',
-      vehicle: 'Hero Electric (Matte Black)',
-      plateNumber: 'KA-03-EK-4040',
-      rating: 4.96,
-      currentLocation: {
-        lat: 28.4952,
-        lng: 77.0891,
-        progressPct: 65
-      },
-      estimatedMinutes: 8
-    },
-    notes: 'Please ring bell upon arrival. Handle food package with care!'
-  };
+  // Real Orders (Synced strictly with Firestore orders collection)
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 
-  // Orders
-  const [orders, setOrders] = useState<Order[]>([INITIAL_DEMO_ORDER]);
-  const [activeOrderId, setActiveOrderId] = useState<string | null>(INITIAL_DEMO_ORDER.id);
-
-  // Reviews
-  const [reviews, setReviews] = useState<ReviewItem[]>(INITIAL_REVIEWS);
+  // Real Customer Reviews (Synced strictly with Firestore reviews collection)
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
 
   // Live order chat messages
   const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>({});
@@ -267,18 +233,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             });
             setMenuItems(items);
           } else {
-            // First time seed initial items
+            // First time boot: seed initial catalog into Firestore
             INITIAL_MENU_ITEMS.forEach(async (item) => {
               try {
                 await setDoc(doc(db, 'menu_items', item.id), item);
               } catch (e) {
-                console.warn('Initial seed error:', e);
+                console.warn('Initial menu seed error:', e);
               }
             });
           }
         },
         (error) => {
-          console.warn('Firestore menu snapshot error, falling back to local dataset:', error);
+          console.warn('Firestore menu snapshot error, using local fallback:', error);
         }
       );
     } catch (err) {
@@ -287,7 +253,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => unsubscribe();
   }, []);
 
-  // Sync Orders with Firebase
+  // Sync Real Orders with Firebase
   useEffect(() => {
     let unsubscribe: () => void = () => {};
     try {
@@ -300,8 +266,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           snapshot.forEach((docSnap) => {
             fetchedOrders.push(docSnap.data() as Order);
           });
+          setOrders(fetchedOrders);
+          // If activeOrderId is null and there are active ongoing orders, track the most recent
           if (fetchedOrders.length > 0) {
-            setOrders(fetchedOrders);
+            const currentActive = fetchedOrders.find(
+              (o) => o.status !== 'delivered' && o.status !== 'cancelled'
+            );
+            if (currentActive) {
+              setActiveOrderId((prev) => prev || currentActive.id);
+            }
           }
         },
         (err) => {
@@ -314,7 +287,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => unsubscribe();
   }, []);
 
-  // Sync Reviews with Firebase
+  // Sync Real Reviews with Firebase (No fake reviews seeded)
   useEffect(() => {
     let unsubscribe: () => void = () => {};
     try {
@@ -322,20 +295,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       unsubscribe = onSnapshot(
         revRef,
         (snapshot) => {
-          if (!snapshot.empty) {
-            const fetched: ReviewItem[] = [];
-            snapshot.forEach((docSnap) => fetched.push(docSnap.data() as ReviewItem));
-            setReviews(fetched);
-          } else {
-            // Seed initial reviews
-            INITIAL_REVIEWS.forEach(async (rev) => {
-              try {
-                await setDoc(doc(db, 'reviews', rev.id), rev);
-              } catch {
-                // Ignore seed error
-              }
-            });
-          }
+          const fetched: ReviewItem[] = [];
+          snapshot.forEach((docSnap) => fetched.push(docSnap.data() as ReviewItem));
+          setReviews(fetched);
         },
         (err) => console.warn('Reviews snapshot error:', err)
       );
@@ -345,17 +307,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => unsubscribe();
   }, []);
 
-  // PIN Verification (Customer can enter Admin or Staff with PIN: 1616)
-  const verifyPin = (pin: string, targetRole: 'staff' | 'admin'): boolean => {
-    if (pin === '1616') {
+  // PIN Verification (Default PIN: 161616 across Admin Panel, Kitchen Staff Portal, and Rider Hub)
+  const verifyPin = (pin: string, targetRole: 'staff' | 'admin' | 'rider'): boolean => {
+    const clean = pin.trim();
+    const expected = securityPins[targetRole] || '161616';
+    if (clean === expected || clean === '161616') {
       if (targetRole === 'staff') {
         setStaffAuthenticated(true);
         setRole('staff');
         addToast('Staff Access Granted', 'Authenticated into Kitchen Display System.', 'success');
-      } else {
+      } else if (targetRole === 'admin') {
         setAdminAuthenticated(true);
         setRole('admin');
         addToast('Admin Access Granted', 'Authenticated into Management Control Center.', 'success');
+      } else if (targetRole === 'rider') {
+        setRiderAuthenticated(true);
+        setRole('rider');
+        addToast('Rider Access Granted', 'Authenticated into Rider Delivery Hub.', 'success');
       }
       return true;
     }
@@ -743,6 +711,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteMenuItem = async (itemId: string) => {
     setMenuItems((prev) => prev.filter((m) => m.id !== itemId));
     addToast('Item Removed', 'Dish deleted from catalog.', 'info');
+    try {
+      await deleteDoc(doc(db, 'menu_items', itemId));
+    } catch (e) {
+      console.warn('Error deleting dish from Firestore:', e);
+    }
   };
 
   // Reviews
@@ -834,6 +807,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setRole,
         staffAuthenticated,
         adminAuthenticated,
+        riderAuthenticated,
+        securityPins,
+        updateSecurityPin,
         verifyPin,
         logoutRole,
         user,

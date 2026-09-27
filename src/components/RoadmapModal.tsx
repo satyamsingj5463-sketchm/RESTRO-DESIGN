@@ -28,24 +28,24 @@ export const RoadmapModal: React.FC<RoadmapModalProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-[#0D131F] border border-white/[0.12] rounded-3xl shadow-2xl overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden text-slate-900">
         {/* Header */}
-        <div className="p-4 sm:p-6 border-b border-white/[0.08] flex items-center justify-between bg-[#080C14]">
+        <div className="p-4 sm:p-6 border-b border-indigo-950/20 flex items-center justify-between bg-gradient-to-r from-[#1E1B4B] via-[#2A2368] to-[#1E1B4B] text-white">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-slate-950 font-bold shadow-lg shadow-amber-500/20">
-              <BookOpen className="w-6 h-6" />
+            <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-950 font-bold shadow-sm">
+              <BookOpen className="w-6 h-6 stroke-[2.5]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="font-bold text-lg text-white font-mono tracking-tight">
+                <h2 className="font-extrabold text-base sm:text-lg text-white font-sans tracking-tight">
                   CODER CAFE: Architecture & Compliance Specs
                 </h2>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-400/20 text-emerald-300 font-mono border border-emerald-400/30 font-bold">
                   Production Verified
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-300">
                 End-to-end engineering specification, Firestore database schema, role security, and Google Play Store policies
               </p>
             </div>
@@ -53,7 +53,7 @@ export const RoadmapModal: React.FC<RoadmapModalProps> = ({ isOpen, onClose }) =
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -193,22 +193,22 @@ export const RoadmapModal: React.FC<RoadmapModalProps> = ({ isOpen, onClose }) =
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[#080C14] border-l-4 border-purple-500 border border-white/[0.06]">
-                <div className="font-bold text-white text-xs flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-slate-50 border-l-4 border-purple-500 border border-slate-200">
+                <div className="font-bold text-slate-900 text-xs flex items-center justify-between">
                   <span>Phase 3: Staff KDS & Live GPS Telemetry</span>
-                  <span className="text-[10px] text-purple-400 font-mono font-bold">COMPLETED ✓</span>
+                  <span className="text-[10px] text-purple-700 font-mono font-bold">COMPLETED ✓</span>
                 </div>
-                <p className="text-slate-400 text-[11px] mt-1">
+                <p className="text-slate-500 text-[11px] mt-1">
                   Implemented Kitchen KDS portal, 86-inventory stock board, animated SVG delivery tracker map, and Rider companion simulator.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[#080C14] border-l-4 border-emerald-500 border border-white/[0.06]">
-                <div className="font-bold text-white text-xs flex items-center justify-between">
+              <div className="p-4 rounded-2xl bg-slate-50 border-l-4 border-emerald-500 border border-slate-200">
+                <div className="font-bold text-slate-900 text-xs flex items-center justify-between">
                   <span>Phase 4: Mobile-App Layout, Security & Launch</span>
-                  <span className="text-[10px] text-emerald-400 font-mono font-bold">READY FOR LAUNCH</span>
+                  <span className="text-[10px] text-emerald-700 font-mono font-bold">READY FOR LAUNCH</span>
                 </div>
-                <p className="text-slate-400 text-[11px] mt-1">
+                <p className="text-slate-500 text-[11px] mt-1">
                   Packaged with mobile native navigation bar, masked secure inputs, INR currency parity, and complete GST printable tax invoices.
                 </p>
               </div>
@@ -217,10 +217,10 @@ export const RoadmapModal: React.FC<RoadmapModalProps> = ({ isOpen, onClose }) =
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-[#080C14] border-t border-white/[0.08] flex items-center justify-end">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-2xl text-xs transition-colors cursor-pointer shadow-md shadow-amber-500/20"
+            className="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 text-slate-950 font-bold rounded-2xl text-xs transition-colors cursor-pointer shadow-sm"
           >
             Close Roadmap
           </button>

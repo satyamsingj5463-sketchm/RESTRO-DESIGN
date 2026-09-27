@@ -140,3 +140,14 @@ export interface ReviewItem {
   dishesOrdered?: string[];
   status: 'published' | 'hidden';
 }
+
+export interface CustomerRecord {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  address: DeliveryAddress;
+  loginTimestamp: number;
+  createdAt: number;
+  totalOrders?: number;
+}
